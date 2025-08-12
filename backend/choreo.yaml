@@ -1,0 +1,67 @@
+# Choreo Service Configuration
+apiVersion: wso2.com/v1alpha1
+kind: Component
+metadata:
+  name: adptx-legal-ai-backend
+  namespace: default
+spec:
+  # Service type
+  type: service
+  
+  # Build configuration
+  build:
+    # Build context
+    context: .
+    
+    # Build commands
+    commands:
+      - pip install -r requirements.txt
+    
+    # Build output
+    output:
+      image: adptx-legal-ai-backend:latest
+  
+  # Runtime configuration
+  runtime:
+    # Python runtime
+    type: python
+    
+    # Python version
+    version: "3.9"
+    
+    # Entry point
+    entrypoint: ["python", "main.py"]
+    
+    # Port configuration (Choreo will set PORT env var)
+    ports:
+      - containerPort: 8000
+        protocol: TCP
+    
+    # Environment variables
+    env:
+      - name: PORT
+        value: "8000"
+      - name: HOST
+        value: "0.0.0.0"
+      - name: DEBUG
+        value: "false"
+    
+    # Resource limits
+    resources:
+      limits:
+        memory: "1Gi"
+        cpu: "1000m"
+      requests:
+        memory: "512Mi"
+        cpu: "500m"
+  
+  # Health check
+  healthCheck:
+    httpGet:
+      path: /api/health
+      port: 8000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 3
+    successThreshold: 1
