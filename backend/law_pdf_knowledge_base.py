@@ -5,9 +5,9 @@ import logging
 try:
     from agno.knowledge.pdf import PDFKnowledgeBase, PDFReader
     from agno.vectordb.lancedb import LanceDb
-    # Temporarily disable embedder to avoid import issues
-    PDF_KNOWLEDGE_AVAILABLE = False
-    print("PDF knowledge base temporarily disabled for deployment")
+    from simple_embedder import SimpleEmbedder
+    PDF_KNOWLEDGE_AVAILABLE = True
+    print("PDF knowledge base components available")
 except ImportError as e:
     PDF_KNOWLEDGE_AVAILABLE = False
     print(f"PDF knowledge base components not available: {e}")
@@ -43,7 +43,7 @@ if PDF_KNOWLEDGE_AVAILABLE:
         vector_db = LanceDb(
             table_name="legal_docs",
             uri=os.path.join(data_dir, "lancedb"),
-            embedder=SentenceTransformersEmbedder(id="all-MiniLM-L6-v2"),
+            embedder=SimpleEmbedder(dimensions=768),
         )
 
         # Setup the PDF knowledge base
