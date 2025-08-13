@@ -1,42 +1,12 @@
-// API utility functions for connecting to backend (works locally and on Choreo)
-// Detect environment and build the correct base URL
-const isLocal = () => typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+// Simple API utility functions using Choreo connection pattern
+const apiUrl = window?.configs?.apiUrl ? window.configs.apiUrl : "http://localhost:8000";
 
-// Allow overriding via env at build time
-const CHOREO_API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_BASE)
-    || "/choreo-apis/mvpv1/backend/v1"; // Updated to new backend connection
-
-// Derive base when hosted under Choreo proxies to handle v1 vs v1.0 automatically
-const deriveChoreoBase = () => {
-    if (typeof window === 'undefined') return CHOREO_API_BASE;
-    const parts = window.location.pathname.split('/').filter(Boolean);
-    const apiIdx = parts.indexOf('choreo-apis');
-    if (apiIdx === -1) return CHOREO_API_BASE;
-    const vIdx = parts.findIndex((seg, i) => i > apiIdx && /^v\d/.test(seg));
-    if (vIdx === -1) return CHOREO_API_BASE;
-    return '/' + parts.slice(0, vIdx + 1).join('/');
-};
-
-const LOCAL_API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_LOCAL_API_BASE)
-    || "http://localhost:8000"; // Default local dev port
-
-const API_BASE_URL = isLocal() ? LOCAL_API_BASE : deriveChoreoBase();
-
-const isChoreo = () => typeof window !== 'undefined' && (window.location.pathname.startsWith('/choreo-apis') || window.location.hostname.includes('choreoapps.dev') || window.location.hostname.includes('choreoapis.dev'));
-
-// Get API key from environment or config
-const getApiKey = () => {
-    const key = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_KEY) || 'chk_eyJjb25uZWN0aW9uLWlkIjoiMDFmMDc4NDctMDMzMC0xNj...';
-    return key;
-};
-
-// Generic request method with API key
+// Generic request method
 const apiRequest = async (endpoint, options = {}) => {
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = `${apiUrl}${endpoint}`;
     const config = {
         headers: {
             'Content-Type': 'application/json',
-            ...(isChoreo() ? { 'apikey': getApiKey() } : {}), // Add API key only on Choreo
             ...options.headers,
         },
         ...options,
@@ -75,17 +45,16 @@ export const apiPost = async (endpoint, data, options = {}) => {
     });
 };
 
-// File upload (for PDFs) with API key
+// File upload (for PDFs)
 export const apiUploadFile = async (endpoint, file, fields = {}, options = {}) => {
     const formData = new FormData();
     formData.append('file', file);
     Object.entries(fields || {}).forEach(([k, v]) => formData.append(k, v));
     
-    const url = `${API_BASE_URL}${endpoint}`;
+    const url = `${apiUrl}${endpoint}`;
     const config = {
         method: 'POST',
         headers: {
-            ...(isChoreo() ? { 'apikey': getApiKey() } : {}), // Add API key only on Choreo
             ...options.headers,
         },
         body: formData,
