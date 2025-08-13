@@ -3,7 +3,7 @@
 const isLocal = () => typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
 // Allow overriding via env at build time
-const CHOREO_API_BASE = (typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_BASE)
+const CHOREO_API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_BASE)
     || "/choreo-apis/adptxmvp/backend/v1.0"; // default; override in Choreo if needed
 
 // Derive base when hosted under Choreo proxies to handle v1 vs v1.0 automatically
@@ -17,7 +17,7 @@ const deriveChoreoBase = () => {
     return '/' + parts.slice(0, vIdx + 1).join('/');
 };
 
-const LOCAL_API_BASE = (typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_LOCAL_API_BASE)
+const LOCAL_API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_LOCAL_API_BASE)
     || "http://localhost:8000"; // Default local dev port
 
 const API_BASE_URL = isLocal() ? LOCAL_API_BASE : deriveChoreoBase();
@@ -26,7 +26,7 @@ const isChoreo = () => typeof window !== 'undefined' && (window.location.pathnam
 
 // Get API key from environment or config
 const getApiKey = () => {
-    const key = (typeof import !== 'undefined' && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_KEY) || '';
+    const key = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_KEY) || '';
     return key;
 };
 
