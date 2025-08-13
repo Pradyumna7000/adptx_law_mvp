@@ -106,7 +106,7 @@ export const api = {
     health: () => apiGet('/api/health'),
     
     // Chat endpoint
-    chat: (message) => apiPost('/api/chat', { message }),
+    chat: (message) => apiPost('/api/chat', { message, user_id: 'user123' }),
     
     // PDF analysis
     analyzePdf: (file, fields) => apiUploadFile('/api/analyze-pdf', file, fields),

@@ -111,11 +111,6 @@ const ChatPage = () => {
         });
       } else {
         // Use the chat endpoint for text messages
-        const requestBody = JSON.stringify({
-          message: messageText,
-          user_id: 'user123'
-        });
-
         response = await api.chat(messageText);
       }
 
@@ -124,7 +119,7 @@ const ChatPage = () => {
       // Create AI response message
       const aiMessage = {
         id: `ai_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        text: pdfFile ? (data.analysis || data.message || 'No response from the AI.') : (data.data || 'No response from the AI.'),
+        text: pdfFile ? (data.analysis || data.message || 'No response from the AI.') : (data.data || data.message || 'No response from the AI.'),
         sender: 'ai',
         timestamp: new Date(),
         executionTime: data.execution_time
