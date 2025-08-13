@@ -1,3 +1,3 @@
 window.configs = {
-    apiUrl: 'https://your-railway-backend-url.railway.app', // Replace with your Railway backend URL
+    apiUrl: 'adptxlawmvp-production.up.railway.app', // Replace with your Railway backend URL
 };
