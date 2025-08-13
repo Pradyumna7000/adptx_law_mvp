@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Send, Loader2, ArrowLeft, Plus, MessageSquare, User, Bot, FileText, X, Upload } from 'lucide-react'
-import { API_BASE_URL } from '../utils/util'
+import { api } from '../utils/util'
 
 const ChatPage = () => {
   const [chats, setChats] = useState([
@@ -110,10 +110,7 @@ const ChatPage = () => {
         formData.append('message', messageText || 'Please analyze this PDF document');
         formData.append('user_id', 'user123');
         
-        response = await fetch(`${API_BASE_URL}/analyze-pdf`, {
-          method: 'POST',
-          body: formData,
-        });
+        response = await api.analyzePdf(file);
       } else {
         // Use the chat endpoint for text messages
         const requestBody = JSON.stringify({
@@ -121,20 +118,10 @@ const ChatPage = () => {
           user_id: 'user123'
         });
 
-        response = await fetch(`${API_BASE_URL}/chat`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: requestBody,
-        });
+        response = await api.chat(messageText);
       }
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      data = await response.json();
+      data = response;
       
       // Create AI response message
       const aiMessage = {
