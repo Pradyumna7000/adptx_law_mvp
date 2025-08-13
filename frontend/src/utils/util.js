@@ -4,10 +4,10 @@ const API_BASE_URL = "/choreo-apis/adptxmvp/backend/v1/api";
 // Get API key from environment or config
 const getApiKey = () => {
     // You can set this in your Choreo frontend environment variables
-    return process.env.REACT_APP_CHOREO_API_KEY || "your-api-key-here";
+    return process.env.VITE_CHOREO_API_KEY || "your-api-key-here";
 };
 
-// Generic request method with authentication
+// Generic request method with API key
 const apiRequest = async (endpoint, options = {}) => {
     const url = `${API_BASE_URL}${endpoint}`;
     const config = {
@@ -47,7 +47,7 @@ export const apiPost = async (endpoint, data, options = {}) => {
     });
 };
 
-// File upload (for PDFs)
+// File upload (for PDFs) with API key
 export const apiUploadFile = async (endpoint, file, options = {}) => {
     const formData = new FormData();
     formData.append('file', file);
@@ -76,5 +76,19 @@ export const apiUploadFile = async (endpoint, file, options = {}) => {
     }
 };
 
-// Export API_BASE_URL for direct use
-export { API_BASE_URL };
+// Specific API endpoints
+export const api = {
+    // Health check
+    health: () => apiGet('/health'),
+    
+    // Chat endpoint
+    chat: (message) => apiPost('/chat', { message }),
+    
+    // PDF analysis
+    analyzePdf: (file) => apiUploadFile('/analyze-pdf', file),
+    
+    // File upload
+    uploadFile: (file) => apiUploadFile('/upload', file),
+};
+
+export default api;
