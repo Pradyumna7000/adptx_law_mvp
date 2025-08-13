@@ -23,6 +23,20 @@ from contextlib import asynccontextmanager
 import tempfile
 
 # ============================================================================
+# ENVIRONMENT VARIABLE LOADING
+# ============================================================================
+
+# Load .env file for local development (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("✅ Loaded .env file for local development")
+except ImportError:
+    print("⚠️ python-dotenv not available, using environment variables directly")
+except Exception as e:
+    print(f"⚠️ Could not load .env file: {e}")
+
+# ============================================================================
 # LOGGING CONFIGURATION (SIMPLIFIED)
 # ============================================================================
 
@@ -142,7 +156,8 @@ def initialize_ai_systems():
     
     if missing_vars:
         logger.warning(f"Missing required environment variables: {missing_vars}")
-        logger.warning("Please set these in your Choreo environment configuration")
+        logger.warning("For local development: Create a .env file with GROQ_API_KEY and INDIAN_KANOON_API_KEY")
+        logger.warning("For Choreo deployment: Set these in Choreo environment configuration")
         logger.warning("Continuing with limited functionality...")
         # Don't return, continue with limited functionality
     
