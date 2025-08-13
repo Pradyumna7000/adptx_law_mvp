@@ -40,12 +40,17 @@ const apiRequest = async (endpoint, options = {}) => {
             ...options.headers,
         },
         ...options,
+        // Add timeout for long-running requests
+        signal: AbortSignal.timeout(120000), // 2 minutes timeout
     };
 
     try {
         const response = await fetch(url, config);
         
         if (!response.ok) {
+            if (response.status === 504) {
+                throw new Error('Request timed out. The AI is taking too long to process. Please try again with a simpler request.');
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         
@@ -84,12 +89,17 @@ export const apiUploadFile = async (endpoint, file, fields = {}, options = {}) =
             ...options.headers,
         },
         body: formData,
+        // Add timeout for long-running requests
+        signal: AbortSignal.timeout(180000), // 3 minutes timeout for PDF processing
     };
 
     try {
         const response = await fetch(url, config);
         
         if (!response.ok) {
+            if (response.status === 504) {
+                throw new Error('PDF processing timed out. The file might be too large or complex. Please try with a smaller PDF or simpler request.');
+            }
             throw new Error(`HTTP error! status: ${response.status}`);
         }
         

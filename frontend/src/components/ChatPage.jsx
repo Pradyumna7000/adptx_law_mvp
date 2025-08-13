@@ -149,7 +149,7 @@ const ChatPage = () => {
       // Create error message
       const errorMessage = {
         id: `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-        text: 'Sorry, there was an error processing your request. Please try again.',
+        text: error.message || 'Sorry, there was an error processing your request. Please try again.',
         sender: 'ai',
         timestamp: new Date(),
         isError: true
