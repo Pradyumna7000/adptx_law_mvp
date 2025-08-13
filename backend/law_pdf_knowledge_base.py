@@ -38,6 +38,10 @@ if PDF_KNOWLEDGE_AVAILABLE:
         # Create data directories
         data_dir = "data"
         os.makedirs(data_dir, exist_ok=True)
+        
+        # Create legal-pdfs directory if it doesn't exist
+        legal_pdfs_dir = "legal-pdfs"
+        os.makedirs(legal_pdfs_dir, exist_ok=True)
 
         # Define the vector database and embedder
         vector_db = LanceDb(
@@ -48,21 +52,47 @@ if PDF_KNOWLEDGE_AVAILABLE:
 
         # Setup the PDF knowledge base
         pdf_knowledge_base = PDFKnowledgeBase(
-            path="legal-pdfs",
+            path=legal_pdfs_dir,
             vector_db=vector_db,
             reader=PDFReader(chunk=True)
         )
 
-        # Load the knowledge base
+        # Load the knowledge base (only if there are PDFs)
         logger.info("Loading law PDF knowledge base...")
-        pdf_knowledge_base.load(recreate=False)
-        logger.info("Law PDF knowledge base loaded successfully")
+        try:
+            pdf_knowledge_base.load(recreate=False)
+            logger.info("Law PDF knowledge base loaded successfully")
+        except Exception as load_error:
+            logger.warning(f"Could not load existing PDF knowledge base: {load_error}")
+            logger.info("PDF knowledge base ready for new PDFs")
         
     except Exception as e:
-        logger.error(f"❌ Failed to initialize PDF knowledge base: {e}")
+        logger.error(f"Failed to initialize PDF knowledge base: {e}")
         pdf_knowledge_base = None
         print(f"PDF knowledge base initialization failed: {e}")
 else:
     logger.warning("PDF knowledge base not available - running without PDF knowledge")
     print("Running without PDF knowledge base")
+
+# Function to add PDF to knowledge base
+def add_pdf_to_knowledge_base(pdf_path: str) -> bool:
+    """Add a PDF to the knowledge base"""
+    if pdf_knowledge_base is None:
+        logger.error("PDF knowledge base not available")
+        return False
+    
+    try:
+        # Copy PDF to legal-pdfs directory
+        import shutil
+        filename = os.path.basename(pdf_path)
+        dest_path = os.path.join("legal-pdfs", filename)
+        shutil.copy2(pdf_path, dest_path)
+        
+        # Reload knowledge base
+        pdf_knowledge_base.load(recreate=True)
+        logger.info(f"Added PDF {filename} to knowledge base")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to add PDF to knowledge base: {e}")
+        return False
 

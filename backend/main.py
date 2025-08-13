@@ -559,6 +559,16 @@ async def upload_pdf(
             query = f"upload and process PDF file {file_path}"
             result = legal_strategist.run_with_monitoring(query, session_id)
             
+            # Also add PDF to knowledge base if available
+            try:
+                from law_pdf_knowledge_base import add_pdf_to_knowledge_base
+                if add_pdf_to_knowledge_base(str(file_path)):
+                    logger.info(f"Added PDF to knowledge base: {file_path}")
+                else:
+                    logger.warning(f"Could not add PDF to knowledge base: {file_path}")
+            except Exception as kb_error:
+                logger.warning(f"Knowledge base integration failed: {kb_error}")
+            
             # Update metrics
             system_metrics['feature_usage']['pdf_analysis'] += 1
             
@@ -616,6 +626,63 @@ async def upload_pdf(
         )
 
 
+
+@app.post("/api/query-pdf-knowledge")
+async def query_pdf_knowledge(
+    request: ChatRequest
+):
+    """Query the PDF knowledge base directly"""
+    try:
+        # Check if PDF knowledge base is available
+        try:
+            from law_pdf_knowledge_base import pdf_knowledge_base
+            if pdf_knowledge_base is None:
+                return JSONResponse(
+                    status_code=503,
+                    content={"status": "error", "error": "PDF knowledge base not available"}
+                )
+        except ImportError:
+            return JSONResponse(
+                status_code=503,
+                content={"status": "error", "error": "PDF knowledge base not available"}
+            )
+        
+        # Validate session
+        session_id = request.session_id
+        if session_id and not validate_session(session_id):
+            session_id = create_session()
+        if not session_id:
+            session_id = create_session()
+        
+        # Query the knowledge base
+        try:
+            # Use the laws agent which has access to the PDF knowledge base
+            from laws_agent import law_agent1
+            
+            result = law_agent1.run(request.message)
+            
+            return JSONResponse(
+                status_code=200,
+                content={
+                    "status": "success",
+                    "message": result.get("content", "Query processed successfully"),
+                    "session_id": session_id,
+                    "source": "pdf_knowledge_base"
+                }
+            )
+        except Exception as e:
+            logger.error(f"PDF knowledge base query failed: {e}")
+            return JSONResponse(
+                status_code=500,
+                content={"status": "error", "error": f"Query failed: {str(e)}"}
+            )
+            
+    except Exception as e:
+        logger.error(f"Unexpected error in PDF knowledge query: {e}")
+        return JSONResponse(
+            status_code=500,
+            content={"status": "error", "error": f"Query failed: {str(e)}"}
+        )
 
 @app.get("/api/status", response_model=SystemStatus)
 async def system_status():
