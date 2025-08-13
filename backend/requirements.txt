@@ -1,4 +1,5 @@
 # Core AI and ML libraries
+agno>=0.3.0
 groq>=0.4.0
 
 # FastAPI and web framework
@@ -14,6 +15,10 @@ structlog>=23.0.0
 # Document processing
 PyPDF2>=3.0.0
 pypdf>=3.17.0
+pymupdf>=1.24.0
+
+# Vector DB / Embeddings
+lancedb>=0.5.3
 
 # Database and storage
 sqlalchemy>=2.0.0
