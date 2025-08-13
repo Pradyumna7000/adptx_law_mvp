@@ -155,10 +155,10 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting ADPTX Legal AI API Server...")
     
-    # Create necessary directories in ai_systems
-    os.makedirs("ai_systems/logs", exist_ok=True)
-    os.makedirs("ai_systems/uploads", exist_ok=True)
-    os.makedirs("ai_systems/files", exist_ok=True)
+    # Create necessary directories
+    os.makedirs("logs", exist_ok=True)
+    os.makedirs("uploads", exist_ok=True)
+    os.makedirs("files", exist_ok=True)
     
     # Initialize AI systems
     initialize_ai_systems()
@@ -218,7 +218,12 @@ app.add_middleware(
         "http://127.0.0.1:5174", 
         "http://127.0.0.1:3000",
         "http://localhost:8080",
-        "http://127.0.0.1:8080"
+        "http://127.0.0.1:8080",
+        # Choreo frontend domains
+        "https://*.choreoapps.dev",
+        "https://*.choreoapis.dev",
+        # Allow all origins in production (you can restrict this later)
+        "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -400,7 +405,7 @@ async def upload_file(
             )
         
         # Create upload directory
-        upload_dir = Path("ai_systems/files")
+        upload_dir = Path("files")
         upload_dir.mkdir(exist_ok=True)
         
         # Generate unique filename
@@ -467,7 +472,7 @@ async def upload_pdf(
             )
         
         # Create upload directory
-        upload_dir = Path("ai_systems/uploads")
+        upload_dir = Path("uploads")
         upload_dir.mkdir(exist_ok=True)
         
         # Generate unique filename
@@ -615,7 +620,7 @@ async def analyze_pdf_endpoint(
             )
         
         # Create upload directory
-        upload_dir = Path("ai_systems/uploads")
+        upload_dir = Path("uploads")
         upload_dir.mkdir(exist_ok=True)
         
         # Save uploaded file with unique name

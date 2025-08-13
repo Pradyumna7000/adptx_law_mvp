@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { Send, Loader2, ArrowLeft, Plus, MessageSquare, User, Bot, FileText, X, Upload } from 'lucide-react'
+import { API_BASE_URL } from '../utils/util'
 
 const ChatPage = () => {
   const [chats, setChats] = useState([
@@ -109,7 +110,7 @@ const ChatPage = () => {
         formData.append('message', messageText || 'Please analyze this PDF document');
         formData.append('user_id', 'user123');
         
-        response = await fetch('http://localhost:8000/api/analyze-pdf', {
+        response = await fetch(`${API_BASE_URL}/analyze-pdf`, {
           method: 'POST',
           body: formData,
         });
@@ -120,7 +121,7 @@ const ChatPage = () => {
           user_id: 'user123'
         });
 
-        response = await fetch('http://localhost:8000/api/chat', {
+        response = await fetch(`${API_BASE_URL}/chat`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

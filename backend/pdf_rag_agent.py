@@ -521,10 +521,6 @@ class PDFRAGAgent:
                 # Check if it's a relative path
                 if os.path.exists(word):
                     return word
-                # Check if it's in ai_systems directory
-                ai_systems_path = f"ai_systems/{word}"
-                if os.path.exists(ai_systems_path):
-                    return ai_systems_path
                 # Check if it's in uploads directory
                 uploads_path = f"uploads/{word}"
                 if os.path.exists(uploads_path):
@@ -535,10 +531,6 @@ class PDFRAGAgent:
             if i > 0 and words[i-1].lower() in ['file', 'pdf', 'document']:
                 if os.path.exists(word):
                     return word
-                # Check if it's in ai_systems directory
-                ai_systems_path = f"ai_systems/{word}"
-                if os.path.exists(ai_systems_path):
-                    return ai_systems_path
                 # Check if it's in uploads directory
                 uploads_path = f"uploads/{word}"
                 if os.path.exists(uploads_path):
@@ -576,7 +568,7 @@ class PDFRAGAgent:
         
         # Special case for test queries
         if "sample.pdf" in query:
-            sample_path = "ai_systems/sample.pdf"
+            sample_path = "sample.pdf"
             if os.path.exists(sample_path):
                 return sample_path
         
