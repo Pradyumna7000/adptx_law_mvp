@@ -198,6 +198,12 @@ async def lifespan(app: FastAPI):
     os.makedirs("logs", exist_ok=True)
     os.makedirs("uploads", exist_ok=True)
     os.makedirs("files", exist_ok=True)
+    os.makedirs("data", exist_ok=True)
+    os.makedirs("law_data", exist_ok=True)
+    os.makedirs("kanoon_data", exist_ok=True)
+    os.makedirs("vector_store", exist_ok=True)
+    os.makedirs("pdf_storage", exist_ok=True)
+    os.makedirs("legal-pdfs", exist_ok=True)
     
     # Initialize AI systems
     initialize_ai_systems()

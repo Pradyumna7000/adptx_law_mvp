@@ -5,12 +5,12 @@ import logging
 try:
     from agno.knowledge.pdf import PDFKnowledgeBase, PDFReader
     from agno.vectordb.lancedb import LanceDb
-    from agno.embedder.ollama import OllamaEmbedder
-    PDF_KNOWLEDGE_AVAILABLE = True
-    print("✅ PDF knowledge base components available")
+    # Temporarily disable embedder to avoid import issues
+    PDF_KNOWLEDGE_AVAILABLE = False
+    print("PDF knowledge base temporarily disabled for deployment")
 except ImportError as e:
     PDF_KNOWLEDGE_AVAILABLE = False
-    print(f"⚠️ PDF knowledge base components not available: {e}")
+    print(f"PDF knowledge base components not available: {e}")
 
 # Setup logging
 def setup_logging():
@@ -43,7 +43,7 @@ if PDF_KNOWLEDGE_AVAILABLE:
         vector_db = LanceDb(
             table_name="legal_docs",
             uri=os.path.join(data_dir, "lancedb"),
-            embedder=OllamaEmbedder(id="nomic-embed-text", dimensions=768),
+            embedder=SentenceTransformersEmbedder(id="all-MiniLM-L6-v2"),
         )
 
         # Setup the PDF knowledge base
@@ -61,8 +61,8 @@ if PDF_KNOWLEDGE_AVAILABLE:
     except Exception as e:
         logger.error(f"❌ Failed to initialize PDF knowledge base: {e}")
         pdf_knowledge_base = None
-        print(f"⚠️ PDF knowledge base initialization failed: {e}")
+        print(f"PDF knowledge base initialization failed: {e}")
 else:
-    logger.warning("⚠️ PDF knowledge base not available - running without PDF knowledge")
-    print("⚠️ Running without PDF knowledge base")
+    logger.warning("PDF knowledge base not available - running without PDF knowledge")
+    print("Running without PDF knowledge base")
 
