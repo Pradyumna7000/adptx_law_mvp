@@ -1,47 +1,50 @@
-apiVersion: wso2.com/v1alpha1
-kind: Component
-metadata:
-  name: adptx-backend
-  labels:
-    app: adptx-backend
-    component: backend
-spec:
-  type: service
-  runtime:
-    type: python
-    version: "3.9"
-  ports:
-    - port: 8000
-      protocol: TCP
+schemaVersion: 1.2
+
+endpoints:
+  - name: adptx-backend
+    displayName: ADPTX Legal AI Backend
+    service:
+      basePath: /
+      port: 8000
+    type: REST
+    networkVisibilities:
+      - Public
+    # Optionally, you can add schemaFilePath: openapi.yaml if you have an OpenAPI spec
+
+configurations:
   env:
     - name: PORT
-      value: "8000"
+      valueFrom:
+        configForm:
+          displayName: API Port
+          type: number
+          required: false
+          default: 8000
     - name: HOST
-      value: "0.0.0.0"
+      valueFrom:
+        configForm:
+          displayName: Host
+          type: string
+          required: false
+          default: "0.0.0.0"
     - name: DEBUG
-      value: "false"
+      valueFrom:
+        configForm:
+          displayName: Debug
+          type: boolean
+          required: false
+          default: false
     - name: GROQ_API_KEY
       valueFrom:
-        secretKeyRef:
-          name: adptx-secrets
-          key: GROQ_API_KEY
+        configForm:
+          displayName: Groq API Key
+          type: secret
+          required: true
     - name: INDIAN_KANOON_API_KEY
       valueFrom:
-        secretKeyRef:
-          name: adptx-secrets
-          key: INDIAN_KANOON_API_KEY
-  resources:
-    limits:
-      memory: "1Gi"
-      cpu: "1000m"
-    requests:
-      memory: "512Mi"
-      cpu: "500m"
-  healthCheck:
-    path: /api/health
-    port: 8000
-    initialDelaySeconds: 30
-    periodSeconds: 10
-    timeoutSeconds: 5
-    failureThreshold: 3
-    successThreshold: 1
+        configForm:
+          displayName: Indian Kanoon API Key
+          type: secret
+          required: true
+
+# No dependencies or file injections for this simple backend
