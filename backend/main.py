@@ -132,6 +132,22 @@ def initialize_ai_systems():
     """Initialize AI systems with proper error handling"""
     global legal_strategist, LEGAL_RESEARCH_AVAILABLE
     
+    # Check required environment variables
+    required_env_vars = ["GROQ_API_KEY", "INDIAN_KANOON_API_KEY"]
+    missing_vars = []
+    
+    for var in required_env_vars:
+        if not os.getenv(var):
+            missing_vars.append(var)
+    
+    if missing_vars:
+        logger.error(f"Missing required environment variables: {missing_vars}")
+        logger.error("Please set these in your Choreo environment configuration")
+        LEGAL_RESEARCH_AVAILABLE = False
+        return
+    
+    logger.info("All required environment variables are set")
+    
     # Import legal research system
     try:
         from orchestrator import LegalStrategist
@@ -154,6 +170,10 @@ async def lifespan(app: FastAPI):
     """Application lifespan manager"""
     # Startup
     logger.info("Starting ADPTX Legal AI API Server...")
+    
+    # Log environment variable status
+    logger.info(f"GROQ_API_KEY: {'✅ Set' if os.getenv('GROQ_API_KEY') else '❌ Missing'}")
+    logger.info(f"INDIAN_KANOON_API_KEY: {'✅ Set' if os.getenv('INDIAN_KANOON_API_KEY') else '❌ Missing'}")
     
     # Create necessary directories
     os.makedirs("logs", exist_ok=True)
@@ -315,10 +335,17 @@ async def root():
 @app.get("/api/health")
 async def health_check():
     """Health check endpoint"""
+    # Check environment variables
+    env_status = {
+        "GROQ_API_KEY": "✅ Set" if os.getenv("GROQ_API_KEY") else "❌ Missing",
+        "INDIAN_KANOON_API_KEY": "✅ Set" if os.getenv("INDIAN_KANOON_API_KEY") else "❌ Missing"
+    }
+    
     health_status = {
         "status": "healthy",
         "timestamp": datetime.now().isoformat(),
         "uptime": get_uptime(),
+        "environment": env_status,
         "features": {
             "legal_research": LEGAL_RESEARCH_AVAILABLE,
             "pdf_analysis": LEGAL_RESEARCH_AVAILABLE,
