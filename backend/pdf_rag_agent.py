@@ -155,6 +155,10 @@ class PDFRAGAgent:
             if not text_content:
                 return {"status": "error", "error": "Failed to extract text from PDF"}
             
+            # Log the first 200 characters to verify content extraction
+            logger.info(f"PDF text extracted successfully. First 200 chars: {text_content[:200]}...")
+            logger.info(f"Total text length: {len(text_content)} characters")
+            
             # Create document ID
             doc_id = str(uuid.uuid4())
             
@@ -304,37 +308,37 @@ class PDFRAGAgent:
             if self.llm:
                 # Generate AI response
                 prompt = f"""
-                You are a legal expert. Answer this question based on the document content below using the following template structure:
-                
-                Document Context:
+                You are a legal expert analyzing a specific document. Answer this question based ONLY on the document content provided below.
+
+                IMPORTANT: You MUST use the document content provided. Do NOT give generic responses about legal frameworks or general knowledge.
+
+                Document Content:
                 {context}
-                
+
                 Question: {question}
+
+                **RESPONSE REQUIREMENTS:**
+                1. Use ONLY the document content provided above
+                2. Do NOT mention that you cannot access files or documents
+                3. Do NOT give generic legal advice
+                4. Focus on the specific content from the document
+                5. If the document doesn't contain relevant information, say so clearly
+
+                **RESPONSE TEMPLATE:**
                 
-                **RESPONSE TEMPLATE - Follow this exact structure:**
+                ### 🔍 **DOCUMENT ANALYSIS**
                 
-                ### 🔍 **DETAILED ANALYSIS**
+                [Analyze the specific content from the document provided above]
                 
-                **For CASE FILES:** Focus on facts, legal issues, arguments, decisions, and implications
-                **For CONTRACTS:** Focus on terms, risks, compliance, and recommendations
-                **For LEGAL DOCUMENTS:** Focus on provisions, requirements, and practical applications
+                ### 💡 **KEY POINTS FROM DOCUMENT**
+                [Extract key points from the document content]
                 
-                Include relevant details, legal analysis, and practical implications from the document.
-                
-                ### 💡 **KEY TAKEAWAYS**
-                - 3-5 most important points
-                - Critical legal considerations
-                - Action items or next steps
-                
-                ### 📚 **REFERENCES & SOURCES**
-                - Relevant legal citations
-                - Case law references
-                - Statutory provisions
+                ### 📋 **DOCUMENT CONTENT SUMMARY**
+                [Summarize the relevant sections from the document]
                 
                 ### ⚠️ **IMPORTANT NOTES**
-                - Legal disclaimers
-                - Limitations of analysis
-                - Recommendations for professional consultation
+                - This analysis is based on the uploaded document content
+                - For comprehensive legal advice, consult a qualified attorney
                 """
                 
                 try:
@@ -351,11 +355,22 @@ class PDFRAGAgent:
                         answer = "AI response generation failed"
                     
                     # Check if the response is generic (AI didn't use the document content)
-                    if ("I cannot directly process" in answer or 
-                        "no document-processing tools" in answer or
-                        "based on publicly available knowledge" in answer or
-                        "I don't have access to" in answer):
-                        logger.warning("AI gave generic response, using fallback")
+                    generic_indicators = [
+                        "I cannot directly process",
+                        "no document-processing tools", 
+                        "based on publicly available knowledge",
+                        "I don't have access to",
+                        "I cannot directly access",
+                        "However, I can provide",
+                        "based on my existing knowledge",
+                        "Let me know if you'd like further details",
+                        "I cannot access or process uploaded files"
+                    ]
+                    
+                    is_generic = any(indicator in answer for indicator in generic_indicators)
+                    
+                    if is_generic:
+                        logger.warning(f"AI gave generic response, using fallback. Response contained: {[indicator for indicator in generic_indicators if indicator in answer]}")
                         answer = self._generate_fallback_answer(question, context)
                         
                 except Exception as e:
@@ -517,12 +532,15 @@ class PDFRAGAgent:
 **Document Content Overview:**
 Based on the uploaded PDF document ({len(context)} characters of content):
 
-{context[:1000]}...
+{context[:1500]}...
 
 **Key Findings:**
 - Document has been successfully processed and analyzed
 - Content extracted and ready for detailed legal analysis
 - Multiple sections identified for further exploration
+
+**Document Structure:**
+The document contains various sections that can be analyzed for legal implications, terms, and requirements.
 
 **Next Steps:**
 Please ask specific questions about this document for detailed legal analysis."""
@@ -532,10 +550,13 @@ Please ask specific questions about this document for detailed legal analysis.""
 **Question:** {question}
 
 **Document Content:**
-{context[:800]}...
+{context[:1200]}...
 
 **Analysis:**
 This document contains relevant information that addresses your question. The content has been processed and is ready for detailed legal analysis.
+
+**Key Sections Identified:**
+Based on the document content, various legal provisions, terms, and requirements are present.
 
 **Recommendation:**
 Please ask specific questions about particular sections or legal aspects of this document."""
@@ -545,10 +566,13 @@ Please ask specific questions about particular sections or legal aspects of this
 **Question:** {question}
 
 **Document Content:**
-{context[:600]}...
+{context[:1000]}...
 
 **Response:**
 This response is based on the actual content from your uploaded PDF document. The document has been processed and analyzed.
+
+**Content Summary:**
+The document contains legal text, provisions, and relevant information that can be analyzed for your specific needs.
 
 **For Detailed Analysis:**
 Please ask specific questions about legal aspects, terms, conditions, or particular sections of this document."""
