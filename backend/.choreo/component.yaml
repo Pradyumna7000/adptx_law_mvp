@@ -5,7 +5,7 @@ endpoints:
     displayName: ADPTX Legal AI Backend
     service:
       basePath: /
-      port: 8000
+      port: 8080
     type: REST
     networkVisibilities:
       - Public
@@ -19,7 +19,7 @@ configurations:
           displayName: API Port
           type: number
           required: false
-          default: 8000
+          default: 8080
     - name: HOST
       valueFrom:
         configForm:
