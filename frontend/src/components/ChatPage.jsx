@@ -105,12 +105,10 @@ const ChatPage = () => {
 
       if (pdfFile) {
         // Use the analyze-pdf endpoint for PDF files
-        const formData = new FormData();
-        formData.append('file', pdfFile);
-        formData.append('message', messageText || 'Please analyze this PDF document');
-        formData.append('user_id', 'user123');
-        
-        response = await api.analyzePdf(file);
+        response = await api.analyzePdf(pdfFile, {
+          message: messageText || 'Please analyze this PDF document',
+          user_id: 'user123'
+        });
       } else {
         // Use the chat endpoint for text messages
         const requestBody = JSON.stringify({
