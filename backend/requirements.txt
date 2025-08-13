@@ -2,6 +2,7 @@
 agno>=0.3.0
 groq>=0.4.0
 pypdf>=3.0.0
+pymupdf>=1.23.0
 
 
 # FastAPI and web framework

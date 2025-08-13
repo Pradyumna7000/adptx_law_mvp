@@ -572,16 +572,31 @@ async def upload_pdf(
                 except Exception as e:
                     logger.warning(f"Failed to cleanup PDF {file_path}: {e}")
                 
-                return JSONResponse(
-                    status_code=200,
-                    content={
-                        "status": "success",
-                        "document_id": result.get("pdf_metadata", {}).get("document_id"),
-                        "message": result.get("content", "PDF processed successfully"),
-                        "chunks_count": result.get("pdf_metadata", {}).get("chunks_count", 0),
-                        "session_id": session_id
-                    }
-                )
+                # Check if this is a fallback response (PDF processing failed)
+                if result.get("pdf_processing_status") == "fallback":
+                    return JSONResponse(
+                        status_code=200,
+                        content={
+                            "status": "success",
+                            "document_id": result.get("document_id"),
+                            "message": result.get("message", "PDF uploaded successfully"),
+                            "chunks_count": result.get("chunks_count", 0),
+                            "session_id": session_id,
+                            "pdf_status": "fallback",
+                            "note": "PDF content extraction limited. Please provide document details for analysis."
+                        }
+                    )
+                else:
+                    return JSONResponse(
+                        status_code=200,
+                        content={
+                            "status": "success",
+                            "document_id": result.get("document_id"),
+                            "message": result.get("message", "PDF processed successfully"),
+                            "chunks_count": result.get("chunks_count", 0),
+                            "session_id": session_id
+                        }
+                    )
             else:
                 # Clean up on failure
                 try:
