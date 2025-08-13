@@ -7,16 +7,12 @@ metadata:
     component: backend
 spec:
   type: service
-  build:
-    context: .
-    dockerfile: Dockerfile
   runtime:
     type: python
     version: "3.9"
   ports:
     - port: 8000
       protocol: TCP
-      targetPort: 8000
   env:
     - name: PORT
       value: "8000"
@@ -49,7 +45,3 @@ spec:
     timeoutSeconds: 5
     failureThreshold: 3
     successThreshold: 1
-  scaling:
-    minReplicas: 1
-    maxReplicas: 3
-    targetCPUUtilizationPercentage: 70
