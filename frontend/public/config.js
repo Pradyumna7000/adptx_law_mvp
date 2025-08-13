@@ -1,3 +1,3 @@
 window.configs = {
-    apiUrl: '/choreo-apis/mvpv1/backend/v1.0',
+    apiUrl: 'https://your-railway-backend-url.railway.app', // Replace with your Railway backend URL
 };
