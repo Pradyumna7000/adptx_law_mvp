@@ -4,7 +4,7 @@ const isLocal = () => typeof window !== 'undefined' && (window.location.hostname
 
 // Allow overriding via env at build time
 const CHOREO_API_BASE = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_BASE)
-    || "/choreo-apis/adptxmvp/backend/v1.0"; // default; override in Choreo if needed
+    || "/choreo-apis/mvpv1/backend/v1"; // Updated to new backend connection
 
 // Derive base when hosted under Choreo proxies to handle v1 vs v1.0 automatically
 const deriveChoreoBase = () => {
@@ -26,7 +26,7 @@ const isChoreo = () => typeof window !== 'undefined' && (window.location.pathnam
 
 // Get API key from environment or config
 const getApiKey = () => {
-    const key = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_KEY) || '';
+    const key = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_CHOREO_API_KEY) || 'chk_eyJjb25uZWN0aW9uLWlkIjoiMDFmMDc4NDctMDMzMC0xNj...';
     return key;
 };
 
