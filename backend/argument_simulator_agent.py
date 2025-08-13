@@ -1,6 +1,5 @@
 from agno.agent import Agent
 from agno.models.groq import Groq
-from dotenv import load_dotenv
 import os
 import logging
 
@@ -22,8 +21,8 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+# Environment variables are loaded from Choreo configuration
+# No need to load .env file in production
 
 argument_simulator_agent3 = Agent(
     model=Groq(id="llama-3.1-8b-instant"),

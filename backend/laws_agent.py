@@ -17,7 +17,6 @@ from agno.agent import Agent
 from agno.models.groq import Groq
 from law_pdf_knowledge_base import pdf_knowledge_base
 from kanoon_law_search import indian_kanoon_law_search
-from dotenv import load_dotenv
 import logging
 
 # Try to import SqliteStorage, fallback to None if not available
@@ -47,8 +46,8 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+# Environment variables are loaded from Choreo configuration
+# No need to load .env file in production
 
 # Initialize storage with proper path (optional)
 storage = None

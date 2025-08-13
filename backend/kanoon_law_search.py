@@ -11,11 +11,9 @@ if current_dir not in sys.path:
 import json
 import codecs
 import logging
-from dotenv import load_dotenv
 from ikapi import IKApi, FileStorage, setup_logging
 
-# Load environment variables
-load_dotenv()
+# Environment variables are loaded from Choreo configuration
 
 # Setup logging
 def setup_kanoon_logging():
@@ -48,7 +46,7 @@ def indian_kanoon_law_search(query: str, limit: int = 10) -> str:
     """
     api_token = os.getenv("INDIAN_KANOON_API_KEY")
     if not api_token:
-        logger.error("API token not found. Set INDIAN_KANOON_API_KEY in .env file.")
+        logger.error("API token not found. Set INDIAN_KANOON_API_KEY in Choreo environment configuration.")
         return json.dumps({"error": "API key missing"})
 
     data_dir = "law_data"

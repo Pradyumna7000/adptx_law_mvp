@@ -11,7 +11,6 @@ from legal_tools import search_past_legal_cases  # Import the generalized search
 
 # Create a Legal Research Agent with a focus on past legal cases
 from agno.models.groq import Groq
-from dotenv import load_dotenv
 import logging
 
 # Setup logging
@@ -32,8 +31,8 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
-load_dotenv()
-os.environ["GROQ_API_KEY"] = os.getenv("GROQ_API_KEY")
+# Environment variables are loaded from Choreo configuration
+# No need to load .env file in production
 
 case_files_agent2 = Agent(name="LegalCasesRetriever",
     role="""You are part of the Legal Research AI Team. Your role is to assist lawyers by retrieving only the most relevant and recent Indian legal case precedents based on a given scenario or query.""",
