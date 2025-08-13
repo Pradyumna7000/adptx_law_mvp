@@ -1,11 +1,9 @@
 // API utility functions for connecting to Choreo backend
-const getApiUrl = () => {
-    return window?.configs?.apiUrl || "/";
-};
+const API_BASE_URL = "https://b31df7b5-1e2a-4f8a-84a5-ad41260faabf-dev.e1-us-east-azure.choreoapis.dev/adptxmvp/backend/v1.0";
 
 // Base API client
 const apiClient = {
-    baseURL: getApiUrl(),
+    baseURL: API_BASE_URL,
     
     // Generic request method
     async request(endpoint, options = {}) {
