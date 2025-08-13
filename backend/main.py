@@ -559,15 +559,7 @@ async def upload_pdf(
             query = f"upload and process PDF file {file_path}"
             result = legal_strategist.run_with_monitoring(query, session_id)
             
-            # Also add PDF to knowledge base if available
-            try:
-                from law_pdf_knowledge_base import add_pdf_to_knowledge_base
-                if add_pdf_to_knowledge_base(str(file_path)):
-                    logger.info(f"Added PDF to knowledge base: {file_path}")
-                else:
-                    logger.warning(f"Could not add PDF to knowledge base: {file_path}")
-            except Exception as kb_error:
-                logger.warning(f"Knowledge base integration failed: {kb_error}")
+
             
             # Update metrics
             system_metrics['feature_usage']['pdf_analysis'] += 1

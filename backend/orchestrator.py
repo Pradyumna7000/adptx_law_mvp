@@ -610,7 +610,7 @@ FORMATTING REQUIREMENTS:
     
     def process_pdf_upload(self, pdf_path: str, session_id: str) -> Dict[str, Any]:
         """
-        Process a PDF upload for analysis using the PDF RAG agent
+        Process a PDF upload for analysis using both PDF RAG agent and PDF knowledge base
         
         Args:
             pdf_path: Path to the uploaded PDF file
@@ -632,6 +632,20 @@ FORMATTING REQUIREMENTS:
             query = f"upload and process PDF file {pdf_path}"
             result = self.pdf_agent.run_with_monitoring(query, session_id)
             
+            # Also add PDF to knowledge base if available
+            knowledge_base_result = None
+            try:
+                from law_pdf_knowledge_base import add_pdf_to_knowledge_base
+                if add_pdf_to_knowledge_base(pdf_path):
+                    logger.info(f"✅ Added PDF to knowledge base: {pdf_path}")
+                    knowledge_base_result = "success"
+                else:
+                    logger.warning(f"⚠️ Could not add PDF to knowledge base: {pdf_path}")
+                    knowledge_base_result = "failed"
+            except Exception as kb_error:
+                logger.warning(f"⚠️ Knowledge base integration failed: {kb_error}")
+                knowledge_base_result = "error"
+            
             if result["status"] == "success":
                 logger.info(f"✅ PDF upload processed successfully: {result['chunks_count']} chunks created")
                 return {
@@ -639,13 +653,15 @@ FORMATTING REQUIREMENTS:
                     'message': result["message"],
                     'document_id': result["document_id"],
                     'chunks_count': result["chunks_count"],
-                    'total_text_length': result.get("total_text_length", 0)
+                    'total_text_length': result.get("total_text_length", 0),
+                    'knowledge_base_status': knowledge_base_result
                 }
             else:
                 logger.error(f"❌ PDF upload failed: {result['error']}")
                 return {
                     'status': 'error',
-                    'error': result["error"]
+                    'error': result["error"],
+                    'knowledge_base_status': knowledge_base_result
                 }
                 
         except Exception as e:
@@ -657,7 +673,7 @@ FORMATTING REQUIREMENTS:
     
     def process_pdf_question(self, question: str, session_id: str) -> Dict[str, Any]:
         """
-        Process a question about an uploaded PDF using the PDF RAG agent
+        Process a question about an uploaded PDF using both PDF RAG agent and PDF knowledge base
         
         Args:
             question: Question about the PDF document
@@ -675,21 +691,52 @@ FORMATTING REQUIREMENTS:
         try:
             logger.info(f"📝 Processing PDF question for session {session_id}: {question}")
             
-            # Use the PDF RAG agent's run_with_monitoring method
+            # Try PDF knowledge base first if available
+            knowledge_base_answer = None
+            try:
+                from law_pdf_knowledge_base import pdf_knowledge_base
+                if pdf_knowledge_base is not None:
+                    # Use the laws agent which has access to PDF knowledge base
+                    from laws_agent import law_agent1
+                    kb_result = law_agent1.run(question)
+                    if kb_result and kb_result.get("content"):
+                        knowledge_base_answer = kb_result.get("content")
+                        logger.info(f"✅ PDF question answered via knowledge base")
+            except Exception as kb_error:
+                logger.warning(f"⚠️ Knowledge base query failed: {kb_error}")
+            
+            # Use the PDF RAG agent's run_with_monitoring method as fallback
             result = self.pdf_agent.run_with_monitoring(question, session_id)
             
             if result["status"] == "success":
                 logger.info(f"✅ PDF question answered successfully")
+                
+                # Combine knowledge base and RAG agent results
+                final_answer = result.get("answer", result.get("summary", result.get("content", "")))
+                if knowledge_base_answer:
+                    final_answer = f"Knowledge Base Answer:\n{knowledge_base_answer}\n\nRAG Agent Answer:\n{final_answer}"
+                
                 return {
                     'status': 'success',
-                    'answer': result.get("answer", result.get("summary", result.get("content", ""))),
+                    'answer': final_answer,
                     'question': question,
                     'document_id': result.get("document_id"),
                     'chunks_used': result.get("chunks_used", 0),
                     'sources': result.get("sources", []),
-                    'execution_time': result.get("execution_time", 0)
+                    'execution_time': result.get("execution_time", 0),
+                    'knowledge_base_used': knowledge_base_answer is not None
                 }
             else:
+                # If RAG agent failed but knowledge base worked
+                if knowledge_base_answer:
+                    return {
+                        'status': 'success',
+                        'answer': knowledge_base_answer,
+                        'question': question,
+                        'knowledge_base_used': True,
+                        'rag_agent_failed': True
+                    }
+                
                 logger.error(f"❌ PDF question failed: {result['error']}")
                 return {
                     'status': 'error',
