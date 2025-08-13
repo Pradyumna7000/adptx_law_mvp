@@ -141,10 +141,10 @@ def initialize_ai_systems():
             missing_vars.append(var)
     
     if missing_vars:
-        logger.error(f"Missing required environment variables: {missing_vars}")
-        logger.error("Please set these in your Choreo environment configuration")
-        LEGAL_RESEARCH_AVAILABLE = False
-        return
+        logger.warning(f"Missing required environment variables: {missing_vars}")
+        logger.warning("Please set these in your Choreo environment configuration")
+        logger.warning("Continuing with limited functionality...")
+        # Don't return, continue with limited functionality
     
     logger.info("All required environment variables are set")
     
@@ -159,6 +159,10 @@ def initialize_ai_systems():
         LEGAL_RESEARCH_AVAILABLE = False
     except Exception as e:
         logger.error(f"Failed to initialize legal research system: {e}")
+        LEGAL_RESEARCH_AVAILABLE = False
+    
+    # Set default status if API keys are missing
+    if missing_vars:
         LEGAL_RESEARCH_AVAILABLE = False
 
 # ============================================================================
