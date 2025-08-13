@@ -21,8 +21,17 @@ def setup_logging():
 setup_logging()
 logger = logging.getLogger(__name__)
 
-# Environment variables are loaded from Choreo configuration
-# No need to load .env file in production
+# Load .env file for local development (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("Loaded .env file for local development")
+except ImportError:
+    print("python-dotenv not available, using environment variables directly")
+except Exception as e:
+    print(f"Could not load .env file: {e}")
+
+# Environment variables are loaded from Choreo configuration in production
 
 argument_simulator_agent3 = Agent(
     model=Groq(id="llama-3.1-8b-instant"),

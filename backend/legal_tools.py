@@ -17,7 +17,17 @@ import json
 import codecs
 from ikapi import IKApi, FileStorage, setup_logging
 
-# Environment variables are loaded from Choreo configuration
+# Load .env file for local development (optional)
+try:
+    from dotenv import load_dotenv
+    load_dotenv()
+    print("Loaded .env file for local development")
+except ImportError:
+    print("python-dotenv not available, using environment variables directly")
+except Exception as e:
+    print(f"Could not load .env file: {e}")
+
+# Environment variables are loaded from Choreo configuration in production
 
 # Setup logging
 def setup_legal_tools_logging():
@@ -61,7 +71,7 @@ def search_past_legal_cases(query: str, limit: int = 10, maxpages: int = 2, maxc
 
     api_token = os.getenv("INDIAN_KANOON_API_KEY")
     if not api_token:
-        logger.error("API token not found. Set INDIAN_KANOON_API_KEY in Choreo environment configuration.")
+        logger.error("API token not found. Set INDIAN_KANOON_API_KEY in .env file (local) or Choreo environment configuration (production).")
         return json.dumps({"error": "API token not found."})
 
     class ApiArgs:
