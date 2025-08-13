@@ -1,0 +1,50 @@
+schemaVersion: 1.2
+
+endpoints:
+  - name: adptx-backend
+    displayName: ADPTX Legal AI Backend
+    service:
+      basePath: /
+      port: 8000
+    type: REST
+    networkVisibilities:
+      - Public
+    # Optionally, you can add schemaFilePath: openapi.yaml if you have an OpenAPI spec
+
+configurations:
+  env:
+    - name: PORT
+      valueFrom:
+        configForm:
+          displayName: API Port
+          type: number
+          required: false
+          default: 8000
+    - name: HOST
+      valueFrom:
+        configForm:
+          displayName: Host
+          type: string
+          required: false
+          default: "0.0.0.0"
+    - name: DEBUG
+      valueFrom:
+        configForm:
+          displayName: Debug
+          type: boolean
+          required: false
+          default: false
+    - name: GROQ_API_KEY
+      valueFrom:
+        configForm:
+          displayName: Groq API Key
+          type: secret
+          required: true
+    - name: INDIAN_KANOON_API_KEY
+      valueFrom:
+        configForm:
+          displayName: Indian Kanoon API Key
+          type: secret
+          required: true
+
+# No dependencies or file injections for this simple backend
