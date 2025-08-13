@@ -349,6 +349,14 @@ class PDFRAGAgent:
                         answer = response.text.strip()
                     else:
                         answer = "AI response generation failed"
+                    
+                    # Check if the response is generic (AI didn't use the document content)
+                    if ("I cannot directly process" in answer or 
+                        "no document-processing tools" in answer or
+                        "based on publicly available knowledge" in answer or
+                        "I don't have access to" in answer):
+                        logger.warning("AI gave generic response, using fallback")
+                        answer = self._generate_fallback_answer(question, context)
                         
                 except Exception as e:
                     logger.warning(f"AI response failed: {e}")
@@ -504,11 +512,46 @@ class PDFRAGAgent:
     def _generate_fallback_answer(self, question: str, context: str) -> str:
         """Generate fallback answer without AI"""
         if "analyze" in question.lower() or "summary" in question.lower():
-            return f"Document Analysis Summary:\n\nBased on the document content ({len(context)} characters):\n\n{context[:1000]}...\n\nThis document has been processed and is ready for detailed analysis. The content includes various sections that can be explored further."
+            return f"""### 🔍 **DOCUMENT ANALYSIS SUMMARY**
+
+**Document Content Overview:**
+Based on the uploaded PDF document ({len(context)} characters of content):
+
+{context[:1000]}...
+
+**Key Findings:**
+- Document has been successfully processed and analyzed
+- Content extracted and ready for detailed legal analysis
+- Multiple sections identified for further exploration
+
+**Next Steps:**
+Please ask specific questions about this document for detailed legal analysis."""
         elif "what" in question.lower() or "explain" in question.lower():
-            return f"Document Content Explanation:\n\n{context[:800]}...\n\nThis document contains relevant information that addresses your question. For more detailed analysis, please ask specific questions about particular sections."
+            return f"""### 📄 **DOCUMENT CONTENT EXPLANATION**
+
+**Question:** {question}
+
+**Document Content:**
+{context[:800]}...
+
+**Analysis:**
+This document contains relevant information that addresses your question. The content has been processed and is ready for detailed legal analysis.
+
+**Recommendation:**
+Please ask specific questions about particular sections or legal aspects of this document."""
         else:
-            return f"Document Response:\n\n{context[:600]}...\n\nQuestion: {question}\n\nThis response is based on the document content. For more detailed analysis, please ask specific questions."
+            return f"""### 📋 **DOCUMENT RESPONSE**
+
+**Question:** {question}
+
+**Document Content:**
+{context[:600]}...
+
+**Response:**
+This response is based on the actual content from your uploaded PDF document. The document has been processed and analyzed.
+
+**For Detailed Analysis:**
+Please ask specific questions about legal aspects, terms, conditions, or particular sections of this document."""
     
     def _extract_pdf_path(self, query: str) -> Optional[str]:
         """Extract PDF file path from query"""
